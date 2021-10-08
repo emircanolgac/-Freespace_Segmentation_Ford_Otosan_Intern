@@ -41,7 +41,7 @@ image_path_list.sort()
 
 mask_path_list = glob.glob(os.path.join(MASK_DIR, '*'))
 mask_path_list.sort()
-
+ 
 
 aug_path_list = glob.glob(os.path.join(AUG_IMAGE_DIR, '*'))
 aug_path_list.sort()
@@ -49,27 +49,26 @@ aug_mask_path_list = glob.glob(os.path.join(AUG_MASK_DIR, '*'))
 aug_mask_path_list.sort()
 
 
-# DATA CHECK
-image_mask_check(image_path_list, mask_path_list)
 
-# SHUFFLE INDICES
-indices = np.random.permutation(len(image_path_list))
+image_mask_check(image_path_list, mask_path_list) #image ve mask'ler karşılaştırıldı.
 
-# DEFINE TEST AND VALID INDICES
-test_ind  = int(len(indices) * test_size)
-valid_ind = int(test_ind + len(indices) * valid_size)
 
-# SLICE TEST DATASET FROM THE WHOLE DATASET
-test_input_path_list = image_path_list[:test_ind]
-test_label_path_list = mask_path_list[:test_ind]
+indices = np.random.permutation(len(image_path_list)) # image'ların yerleri değiştirildi yani liste karıştırıldı.
 
-# SLICE VALID DATASET FROM THE WHOLE DATASET
-valid_input_path_list = image_path_list[test_ind:valid_ind]
-valid_label_path_list = mask_path_list[test_ind:valid_ind]
 
-# SLICE TRAIN DATASET FROM THE WHOLE DATASET
-train_input_path_list = image_path_list[valid_ind:]
-train_label_path_list = mask_path_list[valid_ind:]
+test_ind  = int(len(indices) * test_size) #test verilerinin sayısı belirlendi
+valid_ind = int(test_ind + len(indices) * valid_size) #validation verilerinin sayısı belirlendi
+
+
+test_input_path_list = image_path_list[:test_ind] #test için kullanılacak iamge'lar belirlendi
+test_label_path_list = mask_path_list[:test_ind] #test için kullanılacak mask'ler belirlendi
+
+
+valid_input_path_list = image_path_list[test_ind:valid_ind] #validation için kullanılacak image'lar belirlendi
+valid_label_path_list = mask_path_list[test_ind:valid_ind] #validation için kullanılacak mask'ler belirlendi
+
+train_input_path_list = image_path_list[valid_ind:] #train için kullanılacak image'lar belirlendi
+train_label_path_list = mask_path_list[valid_ind:] #train için kullanılacak mask'ler belirlendi
 
     
 aug_size=int(len(aug_mask_path_list)/2)
@@ -78,8 +77,7 @@ train_label_path_list=aug_mask_path_list[:aug_size]+train_label_path_list+aug_ma
 
 # DEFINE STEPS PER EPOCH
 steps_per_epoch = len(train_input_path_list)//batch_size
-print(len(train_input_path_list))
-print(steps_per_epoch)
+
 # CALL MODEL
 model = FoInternNet(input_size=input_shape, n_classes=2)
 
@@ -139,10 +137,10 @@ for epoch in tqdm.tqdm(range(epochs)):
 
             print('validation loss on epoch {}: {}'.format(epoch, val_loss))
 
-torch.save(outputs, '/Users/EmirCanOlğaç/Desktop/intern-p1/src/model.pth')
+torch.save(outputs, '/Users/EmirCanOlğaç/Desktop/intern-p1/models/model1.pth')
 
 print("Model Saved!")
-best_model = torch.load('/Users/EmirCanOlğaç/Desktop/intern-p1/src/model.pth')
+best_model = torch.load('/Users/EmirCanOlğaç/Desktop/intern-p1/models/model1.pth')
 
 
 
@@ -169,35 +167,32 @@ def draw_graph(val_losses,train_losses,epochs):
     
     plt.show()
 
-
 draw_graph(val_losses,train_losses,epochs)
 
 
 
-# =============================================================================
-# def predict(test_input_path_list):
-# 
-#     for i in tqdm.tqdm(range(len(test_input_path_list))):
-#         batch_test = test_input_path_list[i:i+1]
-#         test_input = tensorize_image(batch_test, input_shape, cuda)
-#         outs = model(test_input)
-#         out=torch.argmax(outs,axis=1)
-#         out_cpu = out.cpu()
-#         outputs_list=out_cpu.detach().numpy()
-#         mask=np.squeeze(outputs_list,axis=0)
-#             
-#             
-#         img=cv2.imread(batch_test[0])
-#         mg=cv2.resize(img,(224,224))
-#         #mask_ind = mask == 1
-#         cpy_img = mg.copy()
-#         mg[mask==1 ,:] = (255, 0, 125)
-#         opac_image=(mg/2+cpy_img/2).astype(np.uint8)
-#         predict_name=batch_test[0]
-#         #predict_path=predict_name.replace('image', 'predict')
-#         cv2.imwrite(PREDICT_DIR, opac_image.astype(np.uint8))
-# 
-# predict(test_input_path_list)
-# 
-# =============================================================================
+def predict(test_input_path_list):
+
+    for i in tqdm.tqdm(range(len(test_input_path_list))):
+        batch_test = test_input_path_list[i:i+1]
+        test_input = tensorize_image(batch_test, input_shape, cuda)
+        outs = model(test_input)
+        out=torch.argmax(outs,axis=1)
+        out_cpu = out.cpu()
+        outputs_list=out_cpu.detach().numpy()
+        mask=np.squeeze(outputs_list,axis=0)
+            
+            
+        img=cv2.imread(batch_test[0])
+        mg=cv2.resize(img,(224,224))
+        mask_ind   = mask == 1
+        cpy_img  = mg.copy()
+        mg[mask==1 ,:] = (255, 0, 125)
+        opac_image=(mg/2+cpy_img/2).astype(np.uint8)
+        predict_name=batch_test[0]
+        predict_path=predict_name.replace('images', 'predicts')
+        cv2.imwrite(predict_path,opac_image.astype(np.uint8))
+
+predict(test_input_path_list)
+
 

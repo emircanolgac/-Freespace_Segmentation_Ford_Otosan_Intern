@@ -6,6 +6,7 @@ import tqdm
 from torchvision import transforms as T
 from constant import *
 from PIL import Image
+
 def image_augmentation(image_path):
     
     if not os.path.exists(AUG_IMAGE_DIR):
@@ -34,7 +35,6 @@ def mask_augmentation(mask_path):
         global newm_path
         
         newm_path = mask[:-4] + "-1.png"
-        #print("\n"+newm_path)
         newm_path = os.path.join(AUG_MASK_DIR, newm_path)
         cv2.imwrite(newm_path, msk)
         

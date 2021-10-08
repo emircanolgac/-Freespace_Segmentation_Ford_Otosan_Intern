@@ -16,11 +16,16 @@ if not os.path.exists(IMAGE_OUT_DIR):
 # Path to original images
 IMAGE_DIR = '../data/images'
 
+
 AUG_IMAGE_DIR = os.path.join('../data/aug_img')
-AUG_MASK_DIR = os.path.join('../data/aug_mask')  
+AUG_MASK_DIR = os.path.join('../data/aug_mask') 
 
-PREDICT_DIR = os.path.join('../data/predict')  
 
+TEST_IMAGE_DIR = os.path.join('../data/test_images')
+TEST_JSON_DIR = os.path.join('./data/test_jsons')
+TEST_MASK_DIR = os.path.join('../data/test_mask')
+if not os.path.exists(TEST_MASK_DIR):
+    os.mkdir(TEST_MASK_DIR)
 
 
 # In order to visualize masked-image(s), change "False" with "True"
